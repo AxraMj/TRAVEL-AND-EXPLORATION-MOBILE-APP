@@ -1,12 +1,13 @@
 services:
   - type: web
     name: travo-backend
-    env: node
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && node server.js
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
     envVars:
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
         sync: false
-    healthCheckPath: /api/health 
+    healthCheckPath: /api/health
+    plan: free
+    branch: main 

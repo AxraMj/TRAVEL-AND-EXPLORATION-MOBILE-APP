@@ -14,53 +14,35 @@
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
-<<<<<<< HEAD
-      "url": "https://u.expo.dev/your-project-id"
-=======
       "url": "https://u.expo.dev/8687e3bc-97c7-4d20-a8a5-ce808951d36c"
->>>>>>> my-new-branch
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-<<<<<<< HEAD
       "bundleIdentifier": "com.travo.app"
-=======
-      "bundleIdentifier": "com.yourcompany.travo"
->>>>>>> my-new-branch
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-<<<<<<< HEAD
       "package": "com.travo.app"
-=======
-      "package": "com.yourcompany.travo"
->>>>>>> my-new-branch
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-<<<<<<< HEAD
-        "projectId": "your-project-id"
+        "projectId": "8687e3bc-97c7-4d20-a8a5-ce808951d36c"
       },
       "apiUrl": {
         "development": "http://localhost:5000",
-        "production": "https://travel-and-exploration-app.onrender.com"
-      }
-    },
-=======
-        "projectId": "8687e3bc-97c7-4d20-a8a5-ce808951d36c"
+        "production": "https://travo-backend.onrender.com"
       }
     },
     "runtimeVersion": "1.0.0",
->>>>>>> my-new-branch
     "owner": "axra123"
   }
 }

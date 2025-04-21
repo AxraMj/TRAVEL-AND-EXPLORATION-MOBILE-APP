@@ -1,15 +1,10 @@
 {
   "cli": {
-<<<<<<< HEAD
     "version": ">= 5.9.1"
-=======
-    "version": ">=3.13.3"
->>>>>>> my-new-branch
   },
   "build": {
     "development": {
       "developmentClient": true,
-<<<<<<< HEAD
       "distribution": "internal",
       "env": {
         "API_URL": "http://localhost:5000/api",
@@ -18,30 +13,21 @@
     },
     "preview": {
       "distribution": "internal",
-      "env": {
-        "API_URL": "https://travo-backend.onrender.com/api",
-        "WS_URL": "wss://travo-backend.onrender.com"
-=======
-      "distribution": "internal"
-    },
-    "preview": {
-      "distribution": "internal",
       "android": {
-        "buildType": "apk"
->>>>>>> my-new-branch
-      }
-    },
-    "production": {
-      "android": {
-<<<<<<< HEAD
         "buildType": "apk"
       },
       "env": {
         "API_URL": "https://travo-backend.onrender.com/api",
         "WS_URL": "wss://travo-backend.onrender.com"
-=======
+      }
+    },
+    "production": {
+      "android": {
         "buildType": "app-bundle"
->>>>>>> my-new-branch
+      },
+      "env": {
+        "API_URL": "https://travo-backend.onrender.com/api",
+        "WS_URL": "wss://travo-backend.onrender.com"
       }
     }
   },

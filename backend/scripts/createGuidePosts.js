@@ -1,8 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../models/User');
-const Guide = require('../models/Guide');
-const Profile = require('../models/Profile');
 const Post = require('../models/Post');
 const logger = require('../utils/logger');
 
@@ -92,11 +90,21 @@ async function createGuidePosts() {
         logger.info(`Creating ${numPosts} guide posts for creator ${creator.username}`);
 
         for (let i = 0; i < numPosts; i++) {
+          // Get random location guide
+          const guide = locationGuides[Math.floor(Math.random() * locationGuides.length)];
+          
           const post = new Post({
             userId: creator._id,
             type: 'guide',
-            // ... rest of post creation logic ...
+            title: `Travel Guide: ${guide.location}`,
+            content: guide.locationNote,
+            location: {
+              name: guide.location,
+              coordinates: { latitude: 0, longitude: 0 } // You might want to add actual coordinates to locationGuides
+            },
+            createdAt: new Date(Date.now() - Math.floor(Math.random() * 7776000000)) // Random date within last 90 days
           });
+          
           await post.save();
           logger.info(`Created guide post: ${post.title}`);
         }

@@ -39,7 +39,7 @@
       },
       "apiUrl": {
         "development": "http://localhost:5000",
-        "production": "https://travo-backend-sxq7.onrender.com"
+        "production": "YOUR_RENDER_BACKEND_URL"
       }
     },
     "owner": "axra123"

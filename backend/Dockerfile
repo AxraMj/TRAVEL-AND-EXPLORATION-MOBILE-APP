@@ -3,14 +3,14 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files first
-COPY ["./package.json", "./"]
-COPY ["./package-lock.json", "./"]
+# Copy package files first (using relative paths)
+COPY package.json package.json
+COPY package-lock.json package-lock.json
 
 # Install dependencies
 RUN npm install --omit=dev
 
-# Copy app source
+# Copy the rest of the application
 COPY . .
 
 # Set default environment variables

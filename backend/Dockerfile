@@ -3,11 +3,11 @@ FROM node:18-alpine
 # Create app directory
 WORKDIR /usr/src/app
 
-# Copy package files first
-COPY package.json .
-COPY package-lock.json .
+# Copy package files individually to debug the issue
+COPY ["package.json", "./"]
+COPY ["package-lock.json", "./"]
 
-# Install dependencies
+# Install production dependencies only
 RUN npm install --omit=dev
 
 # Bundle app source

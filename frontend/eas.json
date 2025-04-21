@@ -5,14 +5,26 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "API_URL": "http://localhost:5000/api",
+        "WS_URL": "ws://localhost:5000"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "API_URL": "https://travo-backend.onrender.com/api",
+        "WS_URL": "wss://travo-backend.onrender.com"
+      }
     },
     "production": {
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "API_URL": "https://travo-backend.onrender.com/api",
+        "WS_URL": "wss://travo-backend.onrender.com"
       }
     }
   },

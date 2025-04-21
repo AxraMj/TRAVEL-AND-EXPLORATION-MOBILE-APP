@@ -11,7 +11,7 @@ on:
       - 'frontend/**'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -27,26 +27,32 @@ jobs:
         cache: 'npm'
         cache-dependency-path: './frontend/package-lock.json'
 
-    - name: Setup Expo
-      uses: expo/expo-github-action@v8
-      with:
-        expo-version: latest
-        token: ${{ secrets.EXPO_TOKEN }}
-
     - name: Install dependencies
-      run: npm ci
+      run: |
+        npm install -g expo-cli
+        npm ci
 
-    - name: Lint
-      run: npm run lint || echo "No linting configured"
+    - name: Setup Jest config
+      run: |
+        echo "{
+          \"preset\": \"jest-expo\",
+          \"transformIgnorePatterns\": [
+            \"node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)\"
+          ],
+          \"setupFiles\": [
+            \"<rootDir>/jest.setup.js\"
+          ]
+        }" > jest.config.json
+
+    - name: Create Jest setup file
+      run: |
+        echo "jest.mock('expo-font');
+        jest.mock('expo-asset');
+        jest.mock('@react-native-async-storage/async-storage', () =>
+          require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+        );" > jest.setup.js
 
     - name: Run tests
-      run: npm test || echo "No tests configured"
+      run: npm test
       env:
-        CI: true
-
-    - name: Build Expo web
-      run: expo build:web || echo "Web build not configured"
-
-    - name: Build Android
-      run: expo build:android || echo "Android build not configured"
-      if: github.ref == 'refs/heads/main' 
+        CI: true 

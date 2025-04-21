@@ -1,8 +1,10 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 const { createCreators } = require('./createCreators');
 const { createExplorers } = require('./createExplorers');
-const logger = require('../utils/logger');
+const createPosts = require('./createPosts');
+const createGuidePosts = require('./createGuidePosts');
 
 async function seedAtlas() {
   try {
@@ -25,10 +27,8 @@ async function seedAtlas() {
 
     // Create posts and guides
     logger.info('Creating posts and guides...');
-    await Promise.all([
-      require('./createPosts')(),
-      require('./createGuidePosts')()
-    ]);
+    await createPosts();
+    await createGuidePosts();
     logger.info('Posts and guides created successfully');
 
     logger.info('Database seeding completed successfully');
@@ -36,6 +36,9 @@ async function seedAtlas() {
   } catch (error) {
     logger.error('Error seeding database:', error);
     process.exit(1);
+  } finally {
+    await mongoose.disconnect();
+    logger.info('Disconnected from MongoDB');
   }
 }
 

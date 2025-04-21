@@ -100,9 +100,11 @@ async function createGuidePosts() {
             content: guide.locationNote,
             location: {
               name: guide.location,
-              coordinates: { latitude: 0, longitude: 0 } // You might want to add actual coordinates to locationGuides
+              coordinates: { latitude: 0, longitude: 0 }
             },
-            createdAt: new Date(Date.now() - Math.floor(Math.random() * 7776000000)) // Random date within last 90 days
+            images: [`https://picsum.photos/seed/${guide.location.replace(/\s+/g, '')}/800/600`],
+            tags: ['travel', 'guide', guide.location.split(',')[0].toLowerCase()],
+            createdAt: new Date(Date.now() - Math.floor(Math.random() * 7776000000))
           });
           
           await post.save();
@@ -118,6 +120,9 @@ async function createGuidePosts() {
   } catch (error) {
     logger.error('Error in createGuidePosts:', error);
     process.exit(1);
+  } finally {
+    await mongoose.disconnect();
+    logger.info('Disconnected from MongoDB');
   }
 }
 

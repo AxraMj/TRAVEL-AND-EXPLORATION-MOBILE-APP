@@ -15,9 +15,11 @@ const TARGET_URI = process.env.MONGODB_URI;
 async function connectToDb(uri, dbName) {
     try {
         const conn = await mongoose.createConnection(uri, {
-            serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
-            socketTimeoutMS: 45000, // Increase socket timeout
-            dbName: dbName // Explicitly set database name
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 30000,
+            socketTimeoutMS: 45000,
+            dbName: dbName
         });
         logger.info(`Connected to ${dbName} database`);
         return conn;
@@ -89,10 +91,17 @@ async function migrate() {
         logger.info('\nMigration completed!');
     } catch (error) {
         logger.error('Migration failed:', error);
+        process.exit(1);
     } finally {
         // Close connections
-        if (sourceDb) await sourceDb.close();
-        if (targetDb) await targetDb.close();
+        if (sourceDb) {
+            await sourceDb.close();
+            logger.info('Closed source database connection');
+        }
+        if (targetDb) {
+            await targetDb.close();
+            logger.info('Closed target database connection');
+        }
         process.exit(0);
     }
 }

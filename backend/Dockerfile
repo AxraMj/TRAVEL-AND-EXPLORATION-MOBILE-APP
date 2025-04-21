@@ -3,12 +3,12 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package files first
+COPY package.json .
+COPY package-lock.json .
 
-# Install dependencies with clean install
-RUN npm install --production --frozen-lockfile && \
-    npm cache clean --force
+# Install dependencies
+RUN npm install --omit=dev
 
 # Copy app source
 COPY . .

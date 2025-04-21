@@ -202,7 +202,7 @@ exports.resetPassword = async (req, res) => {
 
     res.json({ message: 'Password reset successfully' });
   } catch (error) {
-    console.error('Reset password error:', error);
+    logger.error('Reset password error:', error);
     res.status(500).json({ message: 'Failed to reset password' });
   }
 };
@@ -222,15 +222,7 @@ exports.verifyEmail = async (req, res, next) => {
       throw new AppError(404, 'No account found with this email');
     }
 
-    // Generate verification token
-    const verificationToken = jwt.sign(
-      { userId: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
     // TODO: Send verification email with token
-    // For now, we'll just return success
     logger.info('Email verification initiated', { 
       userId: user._id,
       email: user.email 

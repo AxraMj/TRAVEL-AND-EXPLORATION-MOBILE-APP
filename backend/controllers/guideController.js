@@ -1,7 +1,6 @@
 const Guide = require('../models/Guide');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
-const mongoose = require('mongoose');
 const logger = require('../config/logger');
 const { AppError } = require('../middleware/errorHandler');
 
@@ -45,7 +44,7 @@ exports.createGuide = async (req, res) => {
 
     res.status(201).json(formattedGuide);
   } catch (error) {
-    console.error('Create guide error:', error);
+    logger.error('Create guide error:', error);
     res.status(500).json({ message: 'Failed to create guide' });
   }
 };
@@ -72,7 +71,7 @@ exports.getAllGuides = async (req, res) => {
 
     res.json(formattedGuides);
   } catch (error) {
-    console.error('Get guides error:', error);
+    logger.error('Get guides error:', error);
     res.status(500).json({ message: 'Failed to fetch guides' });
   }
 };
@@ -104,7 +103,7 @@ exports.getUserGuides = async (req, res) => {
 
     res.json(formattedGuides);
   } catch (error) {
-    console.error('Get user guides error:', error);
+    logger.error('Get user guides error:', error);
     res.status(500).json({ message: 'Failed to fetch user guides' });
   }
 };

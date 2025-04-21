@@ -467,7 +467,7 @@ exports.updatePost = async (req, res) => {
       { $set: updateData },
       { new: true } // Return the updated document
     ).populate('userId', 'username profileImage fullName')
-     .populate('comments.userId', 'username profileImage fullName');
+      .populate('comments.userId', 'username profileImage fullName');
 
     if (!updatedPost) {
       return res.status(404).json({ message: 'Post could not be updated' });
@@ -480,7 +480,7 @@ exports.updatePost = async (req, res) => {
 
     res.json(postObj);
   } catch (error) {
-    console.error('Update post error:', error);
+    logger.error('Update post error:', error);
     res.status(500).json({ message: 'Failed to update post' });
   }
 };

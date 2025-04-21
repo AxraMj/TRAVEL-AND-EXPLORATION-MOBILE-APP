@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Profile = require('../models/Profile');
 const logger = require('../config/logger');
 const { AppError } = require('../middleware/errorHandler');
+
 exports.searchAll = async (req, res) => {
   try {
     const { query } = req.query;
@@ -28,14 +29,14 @@ exports.searchAll = async (req, res) => {
         { description: searchRegex }
       ]
     })
-    .populate({
-      path: 'userId',
-      match: { accountType: 'creator' }, // Only include posts from creators
-      select: 'fullName username profileImage'
-    })
-    .sort({ createdAt: -1 })
-    .limit(10)
-    .then(posts => posts.filter(post => post.userId)); // Filter out posts where userId is null (non-creator posts)
+      .populate({
+        path: 'userId',
+        match: { accountType: 'creator' }, // Only include posts from creators
+        select: 'fullName username profileImage'
+      })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .then(posts => posts.filter(post => post.userId)); // Filter out posts where userId is null
 
     // Search locations
     const locations = await Post.aggregate([
@@ -71,7 +72,7 @@ exports.searchAll = async (req, res) => {
       locations
     });
   } catch (error) {
-    console.error('Search error:', error);
+    logger.error('Search error:', error);
     res.status(500).json({ message: 'Error performing search' });
   }
 };
@@ -89,12 +90,12 @@ exports.searchUsers = async (req, res) => {
         { username: new RegExp(query, 'i') }
       ]
     })
-    .select('_id fullName username profileImage accountType')
-    .limit(20);
+      .select('_id fullName username profileImage accountType')
+      .limit(20);
 
     res.json(users);
   } catch (error) {
-    console.error('User search error:', error);
+    logger.error('User search error:', error);
     res.status(500).json({ message: 'Error searching users' });
   }
 };
@@ -118,7 +119,7 @@ exports.searchLocations = async (req, res) => {
       {
         $match: {
           'location.name': new RegExp(query, 'i'),
-          'user.accountType': 'creator' // Only include locations from creator posts
+          'user.accountType': 'creator'
         }
       },
       {
@@ -138,7 +139,7 @@ exports.searchLocations = async (req, res) => {
 
     res.json(locations);
   } catch (error) {
-    console.error('Location search error:', error);
+    logger.error('Location search error:', error);
     res.status(500).json({ message: 'Error searching locations' });
   }
 }; 

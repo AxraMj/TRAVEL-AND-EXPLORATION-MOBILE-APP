@@ -1,18 +1,29 @@
 FROM node:18-alpine
 
-WORKDIR /usr/src/app
+# Set working directory
+WORKDIR /app
 
-# First copy only files needed to install dependencies
-COPY ["./package.json", "./"]
-COPY ["./package-lock.json", "./"]
+# Copy package files
+COPY package*.json ./
 
-# Install app dependencies
-RUN npm install --omit=dev
+# Install dependencies with clean install
+RUN npm install --production --frozen-lockfile && \
+    npm cache clean --force
 
-# Then copy the rest of the app
+# Copy app source
 COPY . .
 
-ENV NODE_ENV=production
+# Set environment variables
+ENV NODE_ENV=production \
+    PORT=5000 \
+    HOST=0.0.0.0
+
+# Expose port
 EXPOSE 5000
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:5000/api/health || exit 1
+
+# Start the app
 CMD ["node", "server.js"] 

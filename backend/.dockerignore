@@ -1,7 +1,8 @@
-node_modules
+node_modules/
 npm-debug.log
 .env
-.git
+.env.*
+.git/
 .gitignore
 .dockerignore
 Dockerfile
@@ -9,7 +10,10 @@ README.md
 logs/
 *.log
 .DS_Store
-dist
-build
+dist/
+build/
+coverage/
+.vscode/
+.idea/
 .expo
 .expo-shared 

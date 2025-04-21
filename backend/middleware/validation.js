@@ -1,4 +1,3 @@
-const { body, validationResult } = require('express-validator');
 const { AppError } = require('./errorHandler');
 
 exports.validateRegistration = (req, res, next) => {

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
+const logger = require('../utils/logger');
 
 const explorers = [
   {
@@ -147,138 +148,139 @@ const explorers = [
   }
 ];
 
-async function createFollowRelationships(explorerProfiles) {
+async function createFollowRelationships(explorers, creators) {
   try {
-    console.log('Creating follow relationships for explorers...');
+    logger.info('Starting to create follow relationships');
     
-    // Get all creators
-    const creators = await User.find({ accountType: 'creator' });
-    if (creators.length === 0) {
-      console.log('No creators found. Please run createCreators.js first');
-      return;
-    }
+    for (const explorer of explorers) {
+      // Find the explorer's user document
+      const explorerUser = await User.findOne({ email: explorer.email });
+      
+      if (!explorerUser) {
+        logger.error(`Explorer not found: ${explorer.email}`);
+        continue;
+      }
 
-    const creatorProfiles = await Profile.find({
-      userId: { $in: creators.map(c => c._id) }
-    });
+      // Randomly select 1-3 creators to follow
+      const numToFollow = Math.floor(Math.random() * 3) + 1;
+      const shuffledCreators = creators.sort(() => 0.5 - Math.random());
+      const selectedCreators = shuffledCreators.slice(0, numToFollow);
 
-    console.log(`Found ${creators.length} creators to follow`);
-
-    // For each explorer
-    for (const explorerProfile of explorerProfiles) {
-      try {
-        // Get the explorer's user info for logging
-        const explorer = await User.findById(explorerProfile.userId);
+      for (const creator of selectedCreators) {
+        const creatorUser = await User.findOne({ email: creator.email });
         
-        // Each explorer follows 5-8 creators
-        const numCreatorsToFollow = Math.floor(Math.random() * 4) + 5; // 5-8 creators
-        const shuffledCreators = [...creatorProfiles].sort(() => 0.5 - Math.random());
-        const selectedCreators = shuffledCreators.slice(0, numCreatorsToFollow);
-
-        console.log(`${explorer.username} will follow ${numCreatorsToFollow} creators`);
-
-        // Create follow relationships
-        for (const creatorProfile of selectedCreators) {
-          // Add creator to explorer's following list
-          if (!explorerProfile.following.includes(creatorProfile.userId)) {
-            explorerProfile.following.push(creatorProfile.userId);
-          }
-
-          // Add explorer to creator's followers list
-          if (!creatorProfile.followers.includes(explorerProfile.userId)) {
-            creatorProfile.followers.push(explorerProfile.userId);
-            await creatorProfile.save();
-          }
-
-          const creator = await User.findById(creatorProfile.userId);
-          console.log(`${explorer.username} followed ${creator.username}`);
+        if (!creatorUser) {
+          logger.error(`Creator not found: ${creator.email}`);
+          continue;
         }
 
-        // Save explorer's profile
-        await explorerProfile.save();
-        console.log(`Saved follow relationships for ${explorer.username}`);
+        // Add creator to explorer's following list
+        if (!explorerUser.following.includes(creatorUser._id)) {
+          explorerUser.following.push(creatorUser._id);
+          await explorerUser.save();
+          logger.info(`Explorer ${explorer.email} now following ${creator.email}`);
+        }
 
-      } catch (error) {
-        console.error('Error creating follow relationship:', error);
+        // Add explorer to creator's followers list
+        if (!creatorUser.followers.includes(explorerUser._id)) {
+          creatorUser.followers.push(explorerUser._id);
+          await creatorUser.save();
+        }
       }
     }
-
-    console.log('Successfully created all follow relationships');
+    logger.info('Finished creating follow relationships');
   } catch (error) {
-    console.error('Error in createFollowRelationships:', error);
+    logger.error('Error creating follow relationships:', error);
+    throw error;
   }
 }
 
 async function createExplorers() {
   try {
+    logger.info('Starting explorer creation process');
+    
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Connected to MongoDB');
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    logger.info('Connected to MongoDB successfully');
 
-    const createdProfiles = [];
+    // Delete existing explorers
+    await User.deleteMany({ role: 'explorer' });
+    await Profile.deleteMany({ role: 'explorer' });
+    logger.info('Cleared existing explorer data');
 
-    // Create users and their profiles
-    for (const explorerData of explorers) {
+    const createdExplorers = [];
+
+    // Create explorers
+    for (const explorer of explorers) {
       try {
-        // Check if user already exists
-        const existingUser = await User.findOne({ 
-          $or: [
-            { email: explorerData.email },
-            { username: explorerData.username }
-          ]
-        });
-
-        if (existingUser) {
-          console.log(`Skipping ${explorerData.username} - User already exists`);
-          continue;
-        }
-
         // Hash password
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(explorerData.password, salt);
+        const hashedPassword = await bcrypt.hash(explorer.password, salt);
 
         // Create user
         const user = new User({
-          ...explorerData,
+          email: explorer.email,
           password: hashedPassword,
-          accountType: 'explorer'
+          username: explorer.username,
+          role: 'explorer'
         });
+
         await user.save();
 
         // Create profile
         const profile = new Profile({
-          userId: user._id,
-          bio: `Travel enthusiast exploring the world one destination at a time!`,
-          location: 'Earth',
-          socialLinks: {},
-          interests: ['Travel', 'Culture', 'Food', 'Photography'],
-          stats: {
-            totalPosts: 0,
-            totalGuides: 0,
-            totalLikes: 0
-          },
-          followers: [],
-          following: []
+          user: user._id,
+          fullName: explorer.fullName,
+          role: 'explorer',
+          profileImage: explorer.profileImage
         });
-        await profile.save();
-        createdProfiles.push(profile);
 
-        console.log(`Created explorer: ${explorerData.username}`);
+        await profile.save();
+        
+        // Update user with profile reference
+        user.profile = profile._id;
+        await user.save();
+
+        createdExplorers.push(user);
+        logger.info(`Created explorer: ${explorer.email}`);
       } catch (error) {
-        console.error('Error creating explorer:', error);
+        logger.error(`Error creating explorer ${explorer.email}:`, error);
       }
     }
 
-    // Create follow relationships
-    await createFollowRelationships(createdProfiles);
-    
-    console.log('Successfully created all explorers and their relationships');
-    return true;
+    logger.info(`Successfully created ${createdExplorers.length} explorers`);
+    return createdExplorers;
   } catch (error) {
-    console.error('Error in createExplorers:', error);
+    logger.error('Error in createExplorers:', error);
     throw error;
   }
 }
+
+// Main execution
+(async () => {
+  try {
+    logger.info('Starting script execution');
+    const createdExplorers = await createExplorers();
+    
+    // Get existing creators
+    const creators = await User.find({ role: 'creator' });
+    
+    if (creators.length === 0) {
+      logger.warn('No creators found in the database');
+    } else {
+      await createFollowRelationships(explorers, creators);
+    }
+    
+    logger.info('Script completed successfully');
+    process.exit(0);
+  } catch (error) {
+    logger.error('Script failed:', error);
+    process.exit(1);
+  }
+})();
 
 // Export the function
 module.exports = { createExplorers };

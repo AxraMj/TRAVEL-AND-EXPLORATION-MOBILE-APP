@@ -53,16 +53,16 @@ notificationSchema.index({ type: 1 });
 // Virtual field for notification text
 notificationSchema.virtual('text').get(function() {
   switch (this.type) {
-    case 'like':
-      return 'liked your post';
-    case 'comment':
-      return 'commented on your post';
-    case 'follow':
-      return 'started following you';
-    case 'mention':
-      return `mentioned you in a comment: ${this.message}`;
-    default:
-      return 'interacted with your content';
+  case 'like':
+    return 'liked your post';
+  case 'comment':
+    return 'commented on your post';
+  case 'follow':
+    return 'started following you';
+  case 'mention':
+    return `mentioned you in a comment: ${this.message}`;
+  default:
+    return 'interacted with your content';
   }
 });
 

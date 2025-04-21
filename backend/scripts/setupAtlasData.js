@@ -1,6 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const path = require('path');
+const logger = require('../utils/logger');
 
 // Import all creation scripts
 const createCreators = require('./createCreators');
@@ -11,43 +11,42 @@ const addOotyPosts = require('./addOotyPostsSimple');
 
 async function setupAtlasData() {
     try {
-        // Get MongoDB URI from environment variable
-        const uri = process.env.MONGODB_URI;
-        if (!uri) {
-            throw new Error('MONGODB_URI environment variable is not set');
-        }
+        // Connect to MongoDB Atlas
+        await mongoose.connect(process.env.MONGODB_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+        logger.info('Connected to MongoDB Atlas');
 
-        console.log('Connecting to MongoDB Atlas...');
-        await mongoose.connect(uri);
-        console.log('Connected successfully to MongoDB Atlas');
-
-        // Run creation scripts in sequence
-        console.log('\nCreating Creators...');
-        const { createCreators } = require('./createCreators.js');
+        // Import and run scripts in sequence
+        logger.info('Starting data setup...');
+        
+        const { createCreators } = require('./createCreators');
         await createCreators();
+        logger.info('Creators setup complete');
 
-        console.log('\nCreating Explorers...');
-        const { createExplorers } = require('./createExplorers.js');
+        const { createExplorers } = require('./createExplorers');
         await createExplorers();
+        logger.info('Explorers setup complete');
 
-        console.log('\nCreating Guide Posts...');
-        const { createGuidePosts } = require('./createGuidePosts.js');
-        await createGuidePosts();
-
-        console.log('\nCreating Posts...');
-        const { createPosts } = require('./createPosts.js');
+        const createPosts = require('./createPosts');
         await createPosts();
+        logger.info('Posts setup complete');
 
-        console.log('\nAdding Ooty Posts...');
-        const { addOotyPosts } = require('./addOotyPostsSimple.js');
-        await addOotyPosts();
+        const createGuidePosts = require('./createGuidePosts');
+        await createGuidePosts();
+        logger.info('Guide posts setup complete');
 
-        console.log('\nAll data has been successfully added to MongoDB Atlas!');
+        logger.info('All data setup completed successfully');
         process.exit(0);
     } catch (error) {
-        console.error('Error setting up Atlas data:', error);
+        logger.error('Error setting up data:', error);
         process.exit(1);
+    } finally {
+        await mongoose.disconnect();
+        logger.info('Disconnected from MongoDB');
     }
 }
 
+// Run setup
 setupAtlasData(); 

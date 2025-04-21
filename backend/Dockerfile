@@ -6,7 +6,10 @@ WORKDIR /usr/src/app
 # Copy package files first
 COPY package.json package-lock.json ./
 
+<<<<<<< HEAD
 # Install dependencies
+=======
+>>>>>>> my-new-branch
 RUN npm ci --only=production
 
 # Copy app source
@@ -20,9 +23,12 @@ ENV NODE_ENV=production \
 # Expose port
 EXPOSE 5000
 
+<<<<<<< HEAD
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/api/health || exit 1
 
 # Start the app
+=======
+>>>>>>> my-new-branch
 CMD ["node", "server.js"] 

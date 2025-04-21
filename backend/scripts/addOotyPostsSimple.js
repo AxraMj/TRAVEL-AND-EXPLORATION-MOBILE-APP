@@ -133,13 +133,12 @@ const ootyImages = [
 
 async function addOotyPosts() {
   try {
-    // Connect to MongoDB using direct connection string
-    const MONGODB_URI = 'mongodb://localhost:27017/travo';
-    await mongoose.connect(MONGODB_URI);
-    console.log('Connected to MongoDB');
+    // Connect to MongoDB Atlas using environment variable
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('Connected to MongoDB Atlas');
 
-    // Find the specific user
-    const username = 'axra';
+    // Find the specific user - using a creator from our previous seeds
+    const username = 'wanderlust_sarah';
     const user = await User.findOne({ username });
     
     if (!user) {
@@ -159,7 +158,10 @@ async function addOotyPosts() {
         description: `${location.description}\n\nExploring the beauty of ${location.name}. ${location.tips[0]}`,
         location: {
           name: location.name,
-          coordinates: location.coordinates
+          coordinates: {
+            latitude: location.coordinates.latitude,
+            longitude: location.coordinates.longitude
+          }
         },
         weather: location.weather,
         travelTips: location.tips

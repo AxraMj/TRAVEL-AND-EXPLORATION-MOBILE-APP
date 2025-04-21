@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest --passWithNoTests"
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "test": "jest --passWithNoTests",
+    "build:preview": "eas build --profile preview --platform android",
+    "build:production": "eas build --profile production --platform all"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
@@ -15,13 +21,23 @@
     "@react-navigation/native-stack": "^7.2.1",
     "axios": "^1.8.1",
     "expo": "~52.0.46",
+    "expo-constants": "~15.4.5",
+    "expo-image-picker": "^16.0.6",
+    "expo-linear-gradient": "^14.0.2",
+    "expo-location": "^18.0.10",
+    "expo-status-bar": "~1.11.1",
+    "expo-updates": "~0.24.12",
     "react": "18.3.1",
-    "react-native": "0.76.9"
+    "react-native": "0.76.9",
+    "react-native-maps": "^1.22.6"
   },
   "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "eas-cli": "^7.5.0",
     "jest": "^29.0.0"
   },
   "jest": {
     "testEnvironment": "node"
-  }
+  },
+  "private": true
 }

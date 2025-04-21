@@ -3,6 +3,7 @@ services:
     name: travo-backend
     env: docker
     region: singapore
+<<<<<<< HEAD
     rootDir: backend
     dockerfilePath: ./Dockerfile
     buildCommand: docker build -t travo-backend .
@@ -27,3 +28,21 @@ services:
     healthCheckPath: /api/health
     plan: free
     branch: main 
+=======
+    plan: free
+    branch: main
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+    healthCheckPath: /api/health
+    numInstances: 1
+    buildFilter:
+      paths:
+        - backend/**/* 
+>>>>>>> my-new-branch

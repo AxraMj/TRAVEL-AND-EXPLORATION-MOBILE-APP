@@ -2,7 +2,9 @@ services:
   - type: web
     name: travo-backend
     env: docker
-    dockerfilePath: backend/Dockerfile
+    region: singapore
+    rootDir: backend
+    dockerfilePath: Dockerfile
     envVars:
       - key: NODE_ENV
         value: production

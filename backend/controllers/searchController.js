@@ -1,7 +1,6 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
 const logger = require('../config/logger');
-const { AppError } = require('../middleware/errorHandler');
 
 exports.searchAll = async (req, res) => {
   try {

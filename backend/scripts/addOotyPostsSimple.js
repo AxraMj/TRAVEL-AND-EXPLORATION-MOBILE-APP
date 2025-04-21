@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Post = require('../models/Post');
 const Profile = require('../models/Profile');
+const logger = require('../config/logger');
 
 // Ooty-specific data
 const ootyLocations = [
@@ -135,18 +136,18 @@ async function addOotyPosts() {
   try {
     // Connect to MongoDB Atlas using environment variable
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Connected to MongoDB Atlas');
+    logger.info('Connected to MongoDB Atlas');
 
     // Find the specific user - using a creator from our previous seeds
     const username = 'wanderlust_sarah';
     const user = await User.findOne({ username });
     
     if (!user) {
-      console.error(`User with username "${username}" not found`);
+      logger.error(`User with username "${username}" not found`);
       return;
     }
     
-    console.log(`Found user: ${user.username} (${user._id})`);
+    logger.info(`Found user: ${user.username} (${user._id})`);
     
     // Create 10 Ooty posts for the user
     for (let i = 0; i < ootyLocations.length; i++) {
@@ -154,7 +155,7 @@ async function addOotyPosts() {
       
       const post = new Post({
         userId: user._id,
-        image: ootyImages[i], // Use matching image for each location
+        image: ootyImages[i],
         description: `${location.description}\n\nExploring the beauty of ${location.name}. ${location.tips[0]}`,
         location: {
           name: location.name,
@@ -168,7 +169,7 @@ async function addOotyPosts() {
       });
 
       await post.save();
-      console.log(`Created post #${i+1}: ${location.name}`);
+      logger.info(`Created post #${i+1}: ${location.name}`);
       
       // Update user's post count
       await Profile.findOneAndUpdate(
@@ -177,12 +178,12 @@ async function addOotyPosts() {
       );
     }
 
-    console.log(`Successfully added 10 Ooty posts to ${user.username}'s account`);
+    logger.info(`Successfully added 10 Ooty posts to ${user.username}'s account`);
   } catch (error) {
-    console.error('Script error:', error);
+    logger.error('Script error:', error);
   } finally {
     await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
+    logger.info('Disconnected from MongoDB');
   }
 }
 

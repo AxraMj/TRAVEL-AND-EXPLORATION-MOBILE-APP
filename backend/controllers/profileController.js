@@ -1,7 +1,7 @@
 const Profile = require('../models/Profile');
 const User = require('../models/User');
 const logger = require('../config/logger');
-const { AppError } = require('../middleware/errorHandler');
+
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.params.userId;

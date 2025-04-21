@@ -13,7 +13,7 @@ class AppError extends Error {
 }
 
 // Global error handler middleware
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
   // Default to 500 if no status code is set
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';

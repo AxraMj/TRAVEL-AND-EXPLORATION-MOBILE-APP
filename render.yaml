@@ -4,7 +4,8 @@ services:
     env: docker
     region: singapore
     rootDir: backend
-    dockerfilePath: ./Dockerfile
+    buildCommand: cd backend && docker build -t travel-app-backend .
+    dockerfilePath: Dockerfile
     envVars:
       - key: NODE_ENV
         value: production

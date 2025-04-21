@@ -27,6 +27,11 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// Health check endpoint for deployment
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/guides', auth, guideRoutes);

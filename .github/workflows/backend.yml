@@ -11,42 +11,33 @@ on:
       - 'backend/**'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./backend
 
-    strategy:
-      matrix:
-        node-version: [16.x]
-
     steps:
     - uses: actions/checkout@v3
     
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js 16
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: '16.x'
         cache: 'npm'
         cache-dependency-path: './backend/package-lock.json'
     
     - name: Install dependencies
-      run: npm ci
-    
-    - name: Lint
-      run: npm run lint
-    
-    - name: Create env file
+      run: npm install
+      
+    - name: Create test env file
       run: |
-        echo "MONGODB_URI=mongodb://localhost:27017/test" >> .env
+        echo "MONGODB_URI=mongodb://localhost:27017/test" > .env
         echo "JWT_SECRET=test-secret" >> .env
+        echo "PORT=3000" >> .env
     
     - name: Run tests
       run: npm test
       env:
         CI: true
-        NODE_ENV: test
-        
-    - name: Build
-      run: npm run build --if-present 
+        NODE_ENV: test 

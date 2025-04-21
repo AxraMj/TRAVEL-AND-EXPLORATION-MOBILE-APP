@@ -4,8 +4,9 @@ services:
     env: docker
     region: singapore
     rootDir: backend
-    dockerfilePath: Dockerfile
-    buildCommand: docker build -t travo-backend .
+    dockerfilePath: ./Dockerfile
+    buildCommand: npm install && docker build -t travo-backend .
+    startCommand: node server.js
     envVars:
       - key: NODE_ENV
         value: production

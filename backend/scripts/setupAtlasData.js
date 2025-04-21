@@ -21,19 +21,19 @@ async function setupAtlasData() {
         // Import and run scripts in sequence
         logger.info('Starting data setup...');
         
-        const { createCreators } = require('./createCreators');
+        const { createCreators } = await import('./createCreators.js');
         await createCreators();
         logger.info('Creators setup complete');
 
-        const { createExplorers } = require('./createExplorers');
+        const { createExplorers } = await import('./createExplorers.js');
         await createExplorers();
         logger.info('Explorers setup complete');
 
-        const createPosts = require('./createPosts');
+        const { default: createPosts } = await import('./createPosts.js');
         await createPosts();
         logger.info('Posts setup complete');
 
-        const createGuidePosts = require('./createGuidePosts');
+        const { default: createGuidePosts } = await import('./createGuidePosts.js');
         await createGuidePosts();
         logger.info('Guide posts setup complete');
 

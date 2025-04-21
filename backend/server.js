@@ -12,6 +12,10 @@ const profileRoutes = require("./routes/profile");
 const notificationRoutes = require("./routes/notification");
 const searchRoutes = require("./routes/search");
 const auth = require("./middleware/auth");
+const logger = require('./utils/logger');
+const routes = require('./routes');
+const errorHandler = require('./middleware/errorHandler');
+const { notFoundHandler } = require('./middleware/notFoundHandler');
 
 const app = express();
 const server = http.createServer(app);
@@ -99,13 +103,7 @@ app.use((req, res, next) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  console.log('Health check request received');
-  res.status(200).json({ 
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    clientIp: req.ip,
-    headers: req.headers
-  });
+  res.status(200).json({ status: 'ok' });
 });
 
 // Additional test endpoint
@@ -131,32 +129,42 @@ app.use("/api/notifications", auth, notificationRoutes);
 app.use("/api/search", searchRoutes);
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error("Server error:", err);
-  res.status(500).json({
-    message: "Internal server error",
-    error: process.env.NODE_ENV === "development" ? err.toString() : undefined,
-  });
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => {
+  logger.info('Connected to MongoDB Atlas');
+})
+.catch((error) => {
+  logger.error('MongoDB connection error:', error);
+  process.exit(1);
 });
 
+// Start server
 const PORT = process.env.PORT || 5000;
 const YOUR_IP = "0.0.0.0";  // Listen on all network interfaces
 
-// Connect to MongoDB
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log("Connected to MongoDB");
-    console.log("Database:", mongoose.connection.db.databaseName);
-  })
-  .catch((err) => {
-    console.error("MongoDB connection error:", err);
-    process.exit(1);
-  });
-
-// Start server
 server.listen(PORT, YOUR_IP, () => {
-  console.log(`Server running on http://${YOUR_IP}:${PORT}`);
-  console.log(`WebSocket server running on ws://${YOUR_IP}:${PORT}`);
-  console.log(`Access the API at http://localhost:${PORT} or http://<your-ip>:${PORT}`);
+  logger.info(`Server running on http://${YOUR_IP}:${PORT}`);
+  logger.info(`WebSocket server running on ws://${YOUR_IP}:${PORT}`);
+  logger.info(`Access the API at http://localhost:${PORT} or http://<your-ip>:${PORT}`);
+  
+  if (process.env.NODE_ENV === 'development') {
+    logger.info('Server is running in development mode');
+    logger.info(`API Documentation available at http://localhost:${PORT}/api-docs`);
+  }
 });
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  logger.error('Unhandled Promise Rejection:', err);
+  // Close server & exit process
+  server.close(() => process.exit(1));
+});
+
+module.exports = app;

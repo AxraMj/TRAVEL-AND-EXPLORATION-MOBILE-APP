@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
+const logger = require('../config/logger');
 
 const creators = [
   {
@@ -149,7 +150,7 @@ const creators = [
 
 async function createFollowRelationships(creatorProfiles) {
   try {
-    console.log('Creating follow relationships between creators...');
+    logger.info('Creating follow relationships between creators...');
     
     // For each creator
     for (const profile of creatorProfiles) {
@@ -165,7 +166,7 @@ async function createFollowRelationships(creatorProfiles) {
         const shuffled = [...otherCreators].sort(() => 0.5 - Math.random());
         const selectedCreators = shuffled.slice(0, numToFollow);
 
-        console.log(`${creator.username} will follow ${numToFollow} creators`);
+        logger.info(`${creator.username} will follow ${numToFollow} creators`);
 
         // Create follow relationships
         for (const targetProfile of selectedCreators) {
@@ -181,21 +182,21 @@ async function createFollowRelationships(creatorProfiles) {
           }
 
           const targetCreator = await User.findById(targetProfile.userId);
-          console.log(`${creator.username} followed ${targetCreator.username}`);
+          logger.info(`${creator.username} followed ${targetCreator.username}`);
         }
 
         // Save creator's profile
         await profile.save();
-        console.log(`Saved follow relationships for ${creator.username}`);
+        logger.info(`Saved follow relationships for ${creator.username}`);
 
       } catch (error) {
-        console.error('Error creating follow relationship:', error);
+        logger.error('Error creating follow relationship:', error);
       }
     }
 
-    console.log('Successfully created all follow relationships between creators');
+    logger.info('Successfully created all follow relationships between creators');
   } catch (error) {
-    console.error('Error in createFollowRelationships:', error);
+    logger.error('Error in createFollowRelationships:', error);
   }
 }
 
@@ -203,7 +204,7 @@ async function createCreators() {
   try {
     // Connect to MongoDB
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Connected to MongoDB');
+    logger.info('Connected to MongoDB');
 
     const createdProfiles = [];
 
@@ -219,7 +220,7 @@ async function createCreators() {
         });
 
         if (existingUser) {
-          console.log(`Skipping ${creatorData.username} - User already exists`);
+          logger.info(`Skipping ${creatorData.username} - User already exists`);
           continue;
         }
 
@@ -256,19 +257,19 @@ async function createCreators() {
         await profile.save();
         createdProfiles.push(profile);
 
-        console.log(`Created creator: ${creatorData.username}`);
+        logger.info(`Created creator: ${creatorData.username}`);
       } catch (error) {
-        console.error('Error creating creator:', error);
+        logger.error('Error creating creator:', error);
       }
     }
 
     // Create follow relationships
     await createFollowRelationships(createdProfiles);
     
-    console.log('Successfully created all creators and their relationships');
+    logger.info('Successfully created all creators and their relationships');
     return true;
   } catch (error) {
-    console.error('Error in createCreators:', error);
+    logger.error('Error in createCreators:', error);
     throw error;
   }
 }

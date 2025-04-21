@@ -4,7 +4,8 @@ services:
     env: docker
     region: singapore
     rootDir: backend
-    dockerfilePath: Dockerfile
+    dockerfilePath: ./Dockerfile
+    buildCommand: docker build -t travo-backend .
     envVars:
       - key: NODE_ENV
         value: production

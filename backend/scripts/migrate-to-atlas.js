@@ -1,5 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
 const Post = require('../models/Post');
@@ -96,4 +97,27 @@ async function migrate() {
     }
 }
 
-migrate(); 
+async function migrateToAtlas() {
+  try {
+    // Connect to MongoDB Atlas
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    
+    logger.info('Connected to MongoDB Atlas');
+    
+    // Verify connection by listing collections
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    logger.info('Available collections:', collections.map(c => c.name));
+    
+    logger.info('Migration completed successfully');
+    process.exit(0);
+  } catch (error) {
+    logger.error('Migration failed:', error);
+    process.exit(1);
+  }
+}
+
+// Run migration
+migrateToAtlas(); 

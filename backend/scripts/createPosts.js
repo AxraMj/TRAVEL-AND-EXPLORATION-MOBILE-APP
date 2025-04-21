@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Post = require('../models/Post');
 const Profile = require('../models/Profile');
+const logger = require('../utils/logger');
 
 const locations = [
   {
@@ -168,21 +169,30 @@ const images = [
 
 async function createPosts() {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Connected to MongoDB');
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    logger.info('Connected to MongoDB');
 
     // Get all creators
-    const creators = await User.find({ accountType: 'creator' });
-    console.log(`Found ${creators.length} creators`);
+    const creators = await User.find({ role: 'creator' });
+    if (creators.length === 0) {
+      logger.warn('No creators found. Please run createCreators.js first');
+      process.exit(1);
+    }
+    logger.info(`Found ${creators.length} creators`);
+
+    // Delete existing regular posts
+    await Post.deleteMany({ type: 'regular' });
+    logger.info('Cleared existing regular posts');
 
     for (const creator of creators) {
       try {
-        console.log(`Creating posts for ${creator.username}`);
-        
-        // Each creator gets 3-5 random posts
-        const numPosts = Math.floor(Math.random() * 3) + 3; // 3-5 posts
-        
+        // Create 3-6 regular posts for each creator
+        const numPosts = Math.floor(Math.random() * 4) + 3;
+        logger.info(`Creating ${numPosts} posts for creator ${creator.username}`);
+
         for (let i = 0; i < numPosts; i++) {
           // Get random location and image
           const location = locations[Math.floor(Math.random() * locations.length)];
@@ -208,20 +218,23 @@ async function createPosts() {
             { $inc: { 'stats.totalPosts': 1 } }
           );
 
-          console.log(`Created post for ${creator.username} at ${location.name}`);
+          logger.info(`Created post: ${post.title}`);
         }
       } catch (error) {
-        console.error(`Error creating posts for ${creator.username}:`, error.message);
+        logger.error(`Error creating posts for creator ${creator.username}:`, error);
       }
     }
 
-    console.log('Finished creating posts');
+    logger.info('Successfully created all posts');
+    process.exit(0);
   } catch (error) {
-    console.error('Script error:', error);
+    logger.error('Error in createPosts:', error);
+    process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
+    logger.info('Disconnected from MongoDB');
   }
 }
 
+// Run the function
 createPosts(); 

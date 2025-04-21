@@ -271,7 +271,7 @@ async function createExplorers() {
     if (creators.length === 0) {
       logger.warn('No creators found in the database');
     } else {
-      await createFollowRelationships(explorers, creators);
+      await createFollowRelationships(createdExplorers, creators);
     }
     
     logger.info('Script completed successfully');

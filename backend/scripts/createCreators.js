@@ -106,21 +106,10 @@ async function createCreators() {
 
         // Create profile
         const profile = new Profile({
-          userId: user._id,
-          bio: `Travel enthusiast and content creator. Follow my journey!`,
-          location: 'Worldwide',
-          socialLinks: {
-            instagram: `https://instagram.com/${creatorData.username}`,
-            twitter: `https://twitter.com/${creatorData.username}`
-          },
-          interests: ['Travel', 'Photography', 'Adventure', 'Culture'],
-          stats: {
-            totalPosts: 0,
-            totalGuides: 0,
-            totalLikes: 0
-          },
-          followers: [],
-          following: []
+          user: user._id,
+          fullName: creatorData.fullName,
+          role: 'creator',
+          profileImage: creatorData.profileImage
         });
         await profile.save();
         createdProfiles.push(profile);

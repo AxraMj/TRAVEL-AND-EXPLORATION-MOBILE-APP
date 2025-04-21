@@ -4,7 +4,7 @@ services:
     env: docker
     region: singapore
     rootDir: backend
-    dockerfilePath: Dockerfile
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: NODE_ENV
         value: production

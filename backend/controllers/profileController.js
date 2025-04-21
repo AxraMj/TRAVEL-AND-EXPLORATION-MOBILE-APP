@@ -232,7 +232,7 @@ exports.unfollowUser = async (req, res) => {
       isFollowing: false
     });
   } catch (error) {
-    console.error('Unfollow user error:', error);
+    logger.error('Unfollow user error:', error);
     res.status(500).json({ message: 'Failed to unfollow user' });
   }
 };
@@ -251,7 +251,7 @@ exports.getFollowers = async (req, res) => {
 
     res.json(profile.followers);
   } catch (error) {
-    console.error('Error fetching followers:', error);
+    logger.error('Error fetching followers:', error);
     res.status(500).json({ message: 'Error fetching followers' });
   }
 };
@@ -270,7 +270,7 @@ exports.getFollowing = async (req, res) => {
 
     res.json(profile.following);
   } catch (error) {
-    console.error('Error fetching following:', error);
+    logger.error('Error fetching following:', error);
     res.status(500).json({ message: 'Error fetching following list' });
   }
 }; 

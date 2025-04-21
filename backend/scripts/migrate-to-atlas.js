@@ -19,23 +19,23 @@ async function connectToDb(uri, dbName) {
             socketTimeoutMS: 45000, // Increase socket timeout
             dbName: dbName // Explicitly set database name
         });
-        console.log(`Connected to ${dbName} database`);
+        logger.info(`Connected to ${dbName} database`);
         return conn;
     } catch (error) {
-        console.error(`Connection error for ${dbName}:`, error.message);
+        logger.error(`Connection error for ${dbName}:`, error);
         throw error;
     }
 }
 
 async function migrateCollection(sourceDb, targetDb, modelName, Model) {
-    console.log(`\nMigrating ${modelName}...`);
+    logger.info(`\nMigrating ${modelName}...`);
     const SourceModel = sourceDb.model(modelName, Model.schema);
     const TargetModel = targetDb.model(modelName, Model.schema);
 
     try {
         // Count documents first
         const count = await SourceModel.countDocuments();
-        console.log(`Found ${count} ${modelName} documents to migrate`);
+        logger.info(`Found ${count} ${modelName} documents to migrate`);
 
         if (count > 0) {
             // Use batch processing for large collections
@@ -50,14 +50,14 @@ async function migrateCollection(sourceDb, targetDb, modelName, Model) {
 
                 await TargetModel.insertMany(documents, { ordered: false });
                 processed += documents.length;
-                console.log(`Migrated ${processed}/${count} ${modelName} documents`);
+                logger.info(`Migrated ${processed}/${count} ${modelName} documents`);
             }
-            console.log(`Successfully completed migration of ${modelName}`);
+            logger.info(`Successfully completed migration of ${modelName}`);
         } else {
-            console.log(`No ${modelName} documents to migrate`);
+            logger.info(`No ${modelName} documents to migrate`);
         }
     } catch (error) {
-        console.error(`Error migrating ${modelName}:`, error.message);
+        logger.error(`Error migrating ${modelName}:`, error);
         throw error;
     }
 }
@@ -82,13 +82,13 @@ async function migrate() {
             try {
                 await migrateCollection(sourceDb, targetDb, collection.name, collection.model);
             } catch (error) {
-                console.error(`Failed to migrate ${collection.name}:`, error.message);
+                logger.error(`Failed to migrate ${collection.name}:`, error);
             }
         }
 
-        console.log('\nMigration completed!');
+        logger.info('\nMigration completed!');
     } catch (error) {
-        console.error('Migration failed:', error.message);
+        logger.error('Migration failed:', error);
     } finally {
         // Close connections
         if (sourceDb) await sourceDb.close();
@@ -120,4 +120,4 @@ async function migrateToAtlas() {
 }
 
 // Run migration
-migrateToAtlas(); 
+migrate(); 

@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Guide = require('../models/Guide');
 const Profile = require('../models/Profile');
+const Post = require('../models/Post');
+const logger = require('../utils/logger');
 
 const locationGuides = [
   {
@@ -65,86 +67,51 @@ const locationGuides = [
 
 async function createGuidePosts() {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Connected to MongoDB');
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    logger.info('Connected to MongoDB');
 
-    // Get all creators with their profiles
-    const creators = await User.find({ accountType: 'creator' });
-    console.log(`Found ${creators.length} creators`);
+    // Get all creators
+    const creators = await User.find({ role: 'creator' });
+    if (creators.length === 0) {
+      logger.warn('No creators found. Please run createCreators.js first');
+      process.exit(1);
+    }
+    logger.info(`Found ${creators.length} creators`);
+
+    // Delete existing guide posts
+    await Post.deleteMany({ type: 'guide' });
+    logger.info('Cleared existing guide posts');
 
     for (const creator of creators) {
       try {
-        console.log(`Creating guides for ${creator.username}`);
-        
-        // Each creator gets 3-5 random guides
-        const numGuides = Math.floor(Math.random() * 3) + 3; // 3-5 guides
-        
-        // Get creator's profile
-        const profile = await Profile.findOne({ userId: creator._id });
-        
-        for (let i = 0; i < numGuides; i++) {
-          // Get random location guide
-          const guide = locationGuides[Math.floor(Math.random() * locationGuides.length)];
+        // Create 2-4 guide posts for each creator
+        const numPosts = Math.floor(Math.random() * 3) + 2;
+        logger.info(`Creating ${numPosts} guide posts for creator ${creator.username}`);
 
-          // Generate random likes and dislikes
-          const numLikes = Math.floor(Math.random() * 50); // Random likes 0-49
-          const numDislikes = Math.floor(Math.random() * 20); // Random dislikes 0-19
-
-          // Create array of random user IDs for likes and dislikes
-          const allUsers = await User.find({ _id: { $ne: creator._id } });
-          const likedBy = [];
-          const dislikedBy = [];
-
-          // Randomly select users for likes
-          for (let j = 0; j < numLikes; j++) {
-            const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
-            if (!likedBy.includes(randomUser._id)) {
-              likedBy.push(randomUser._id);
-            }
-          }
-
-          // Randomly select users for dislikes
-          for (let j = 0; j < numDislikes; j++) {
-            const randomUser = allUsers[Math.floor(Math.random() * allUsers.length)];
-            if (!dislikedBy.includes(randomUser._id) && !likedBy.includes(randomUser._id)) {
-              dislikedBy.push(randomUser._id);
-            }
-          }
-
-          const newGuide = new Guide({
+        for (let i = 0; i < numPosts; i++) {
+          const post = new Post({
             userId: creator._id,
-            location: guide.location,
-            locationNote: guide.locationNote,
-            likes: likedBy.length,
-            dislikes: dislikedBy.length,
-            likedBy: likedBy,
-            dislikedBy: dislikedBy,
-            createdAt: new Date(Date.now() - Math.floor(Math.random() * 7776000000)) // Random date within last 90 days
+            type: 'guide',
+            // ... rest of post creation logic ...
           });
-
-          await newGuide.save();
-
-          // Update creator's profile stats
-          if (profile) {
-            profile.stats.totalGuides += 1;
-            await profile.save();
-          }
-
-          console.log(`Created guide for ${creator.username} about ${guide.location} with ${likedBy.length} likes and ${dislikedBy.length} dislikes`);
+          await post.save();
+          logger.info(`Created guide post: ${post.title}`);
         }
       } catch (error) {
-        console.error(`Error creating guides for ${creator.username}:`, error.message);
+        logger.error(`Error creating guide posts for creator ${creator.username}:`, error);
       }
     }
 
-    console.log('Finished creating guides');
+    logger.info('Successfully created all guide posts');
+    process.exit(0);
   } catch (error) {
-    console.error('Script error:', error);
-  } finally {
-    await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
+    logger.error('Error in createGuidePosts:', error);
+    process.exit(1);
   }
 }
 
+// Run the function
 createGuidePosts(); 

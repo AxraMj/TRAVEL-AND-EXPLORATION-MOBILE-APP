@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: travo-backend
+    env: docker
+    region: singapore
+    plan: free
+    branch: main
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+    healthCheckPath: /api/health
+    numInstances: 1
+    buildFilter:
+      paths:
+        - backend/**/* 

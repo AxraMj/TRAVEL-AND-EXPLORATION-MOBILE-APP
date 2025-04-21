@@ -7,7 +7,13 @@
     "dev": "nodemon server.js",
     "test": "jest --passWithNoTests",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "seed:creators": "node scripts/createCreators.js",
+    "seed:explorers": "node scripts/createExplorers.js",
+    "seed:posts": "node scripts/createPosts.js",
+    "seed:guides": "node scripts/createGuidePosts.js",
+    "seed:ooty": "node scripts/addOotyPostsSimple.js",
+    "seed:all": "npm run seed:creators && npm run seed:explorers && npm run seed:posts && npm run seed:guides && npm run seed:ooty"
   },
   "keywords": [],
   "author": "",

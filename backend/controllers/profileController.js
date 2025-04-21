@@ -46,7 +46,7 @@ exports.getProfile = async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    console.error('Get profile error:', error);
+    logger.error('Get profile error:', error);
     res.status(500).json({ message: 'Failed to fetch profile' });
   }
 };
@@ -115,7 +115,7 @@ exports.updateProfile = async (req, res) => {
       profile
     });
   } catch (error) {
-    console.error('Update profile error:', error);
+    logger.error('Update profile error:', error);
     res.status(500).json({ message: 'Failed to update profile' });
   }
 };
@@ -140,7 +140,7 @@ exports.updateStats = async (req, res) => {
     await profile.save();
     res.json(profile);
   } catch (error) {
-    console.error('Update stats error:', error);
+    logger.error('Update stats error:', error);
     res.status(500).json({ message: 'Failed to update stats' });
   }
 };
@@ -186,7 +186,7 @@ exports.followUser = async (req, res) => {
       isFollowing: true
     });
   } catch (error) {
-    console.error('Follow user error:', error);
+    logger.error('Follow user error:', error);
     res.status(500).json({ message: 'Failed to follow user' });
   }
 };

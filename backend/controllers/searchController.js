@@ -1,6 +1,5 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
-const Profile = require('../models/Profile');
 const logger = require('../config/logger');
 const { AppError } = require('../middleware/errorHandler');
 

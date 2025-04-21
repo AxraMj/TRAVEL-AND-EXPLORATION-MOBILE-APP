@@ -1,0 +1,9 @@
+**/node_modules
+**/npm-debug.log
+**/.git
+**/.env
+**/.DS_Store
+**/dist
+**/build
+**/.expo
+**/.expo-shared 

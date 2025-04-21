@@ -17,6 +17,12 @@ jobs:
       run:
         working-directory: ./backend
 
+    services:
+      mongodb:
+        image: mongo:4.4
+        ports:
+          - 27017:27017
+
     steps:
     - uses: actions/checkout@v3
     
@@ -36,8 +42,32 @@ jobs:
         echo "JWT_SECRET=test-secret" >> .env
         echo "PORT=3000" >> .env
     
-    - name: Run tests
-      run: npm test
+    - name: Run tests with coverage
+      run: npm run test:coverage
       env:
         CI: true
-        NODE_ENV: test 
+        NODE_ENV: test
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        directory: ./backend/coverage
+        flags: backend
+        name: backend-coverage
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Deploy to staging
+      run: |
+        echo "Add deployment steps here"
+      env:
+        CI: true 

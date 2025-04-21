@@ -30,20 +30,47 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Create test setup
-      run: |
-        echo "module.exports = {};" > jest.setup.js
-
-    - name: Create basic test
-      run: |
-        mkdir -p src/__tests__
-        echo "describe('Basic Test', () => {
-          it('should pass', () => {
-            expect(true).toBe(true);
-          });
-        });" > src/__tests__/basic.test.js
-
-    - name: Run tests
-      run: npm test
+    - name: Run tests with coverage
+      run: npm run test:coverage
       env:
-        CI: true 
+        CI: true
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        directory: ./frontend/coverage
+        flags: frontend
+        name: frontend-coverage
+
+  build-and-preview:
+    needs: test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Setup Expo
+      uses: expo/expo-github-action@v8
+      with:
+        expo-version: latest
+        token: ${{ secrets.EXPO_TOKEN }}
+
+    - name: Create Expo preview
+      run: |
+        expo publish --release-channel=pr-${{ github.event.number }} || echo "Preview creation failed"
+      env:
+        EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }} 

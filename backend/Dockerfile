@@ -2,13 +2,14 @@ FROM node:18-alpine
 
 WORKDIR /usr/src/app
 
-# Copy package files
-COPY package.json package-lock.json ./
+# First copy only files needed to install dependencies
+COPY ["./package.json", "./"]
+COPY ["./package-lock.json", "./"]
 
-# Install dependencies
+# Install app dependencies
 RUN npm install --omit=dev
 
-# Bundle app source
+# Then copy the rest of the app
 COPY . .
 
 ENV NODE_ENV=production

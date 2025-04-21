@@ -7,4 +7,9 @@ npm-debug.log
 Dockerfile
 README.md
 logs/
-*.log 
+*.log
+.DS_Store
+dist
+build
+.expo
+.expo-shared 

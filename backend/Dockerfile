@@ -1,31 +1,24 @@
 FROM node:18-alpine
 
 # Set working directory
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Copy package files first (using relative paths)
-COPY package.json package.json
-COPY package-lock.json package-lock.json
+# Copy package files first
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install --omit=dev
 
-# Copy the rest of the application
+# Copy app source
 COPY . .
 
-# Set default environment variables
+# Set environment variables
 ENV NODE_ENV=production \
     PORT=5000 \
     HOST=0.0.0.0
 
-# These will be overridden by Render's environment variables
-ARG NODE_ENV
-ARG PORT
-ENV NODE_ENV=${NODE_ENV:-production}
-ENV PORT=${PORT:-5000}
-
 # Expose port
-EXPOSE ${PORT}
+EXPOSE 5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \

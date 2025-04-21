@@ -1,7 +1,7 @@
 const Guide = require('../models/Guide');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
-const logger = require('../config/logger');
+const logger = require('../utils/logger');
 const { AppError } = require('../middleware/errorHandler');
 
 exports.createGuide = async (req, res) => {
@@ -138,7 +138,7 @@ exports.likeGuide = async (req, res) => {
     await guide.save();
     res.json(guide);
   } catch (error) {
-    console.error('Like guide error:', error);
+    logger.error('Failed to like guide', { error: error.message, guideId: req.params.guideId, userId: req.user.userId });
     res.status(500).json({ message: 'Failed to like guide' });
   }
 };
@@ -173,7 +173,7 @@ exports.dislikeGuide = async (req, res) => {
     await guide.save();
     res.json(guide);
   } catch (error) {
-    console.error('Dislike guide error:', error);
+    logger.error('Failed to dislike guide', { error: error.message, guideId: req.params.guideId, userId: req.user.userId });
     res.status(500).json({ message: 'Failed to dislike guide' });
   }
 };
@@ -201,7 +201,7 @@ exports.deleteGuide = async (req, res) => {
 
     res.json({ message: 'Guide deleted successfully', deletedGuideId: guideId });
   } catch (error) {
-    console.error('Delete guide error:', error);
+    logger.error('Failed to delete guide', { error: error.message, guideId: req.params.guideId, userId: req.user.userId });
     res.status(500).json({ message: 'Failed to delete guide' });
   }
 }; 

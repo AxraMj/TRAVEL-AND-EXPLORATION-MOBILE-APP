@@ -7,16 +7,16 @@ const { AppError } = require('../middleware/errorHandler');
 exports.getNotifications = async (req, res) => {
   try {
     if (!req.user || !req.user.userId) {
-      console.error('No user ID in request');
+      logger.error('No user ID in request');
       return res.status(401).json({ message: 'User not authenticated' });
     }
 
-    console.log('Fetching notifications for user:', req.user.userId);
+    logger.info('Fetching notifications for user:', { userId: req.user.userId });
     
     // First check if the user exists
     const userExists = await User.findById(req.user.userId);
     if (!userExists) {
-      console.error('User not found:', req.user.userId);
+      logger.error('User not found:', { userId: req.user.userId });
       return res.status(404).json({ message: 'User not found' });
     }
     
@@ -27,10 +27,10 @@ exports.getNotifications = async (req, res) => {
       .limit(20)
       .lean(); // Use lean() for better performance
 
-    console.log('Raw notifications found:', notifications.length);
+    logger.debug('Raw notifications found:', { count: notifications.length });
 
     if (!Array.isArray(notifications)) {
-      console.error('Notifications is not an array:', notifications);
+      logger.error('Notifications is not an array:', { notifications });
       return res.status(500).json({ message: 'Invalid notifications data' });
     }
 
@@ -58,26 +58,26 @@ exports.getNotifications = async (req, res) => {
         }
         groups[groupKey].push(notification);
       } catch (err) {
-        console.error('Error processing notification:', err, notification);
+        logger.error('Error processing notification:', { error: err, notification });
       }
       return groups;
     }, {});
 
-    console.log('Grouped notifications:', Object.keys(groupedNotifications));
+    logger.debug('Grouped notifications:', { groups: Object.keys(groupedNotifications) });
 
     const unreadCount = await Notification.countDocuments({ 
       userId: req.user.userId, 
       read: false 
     });
 
-    console.log('Unread count:', unreadCount);
+    logger.debug('Unread count:', { count: unreadCount });
 
     res.json({
       unreadCount,
       groups: groupedNotifications
     });
   } catch (error) {
-    console.error('Get notifications error:', error);
+    logger.error('Get notifications error:', { error });
     res.status(500).json({ 
       message: 'Failed to fetch notifications',
       error: process.env.NODE_ENV === 'development' ? error.toString() : undefined
@@ -104,7 +104,7 @@ exports.markAsRead = async (req, res) => {
     
     res.json({ message: 'Notification marked as read' });
   } catch (error) {
-    console.error('Mark notification as read error:', error);
+    logger.error('Mark notification as read error:', { error });
     res.status(500).json({ message: 'Failed to mark notification as read' });
   }
 };
@@ -121,7 +121,7 @@ exports.markAllAsRead = async (req, res) => {
       updated: result.modifiedCount
     });
   } catch (error) {
-    console.error('Mark all notifications as read error:', error);
+    logger.error('Mark all notifications as read error:', { error });
     res.status(500).json({ message: 'Failed to mark notifications as read' });
   }
 };
@@ -130,7 +130,7 @@ exports.createNotification = async (recipientId, triggeredById, type, data = {})
   try {
     // Skip if recipient is the same as triggerer
     if (recipientId.toString() === triggeredById.toString()) {
-      console.log('Skipping self-notification');
+      logger.debug('Skipping self-notification');
       return null;
     }
 
@@ -145,7 +145,7 @@ exports.createNotification = async (recipientId, triggeredById, type, data = {})
     });
 
     if (existingNotification) {
-      console.log('Similar notification exists within the last hour, skipping...');
+      logger.debug('Similar notification exists within the last hour, skipping...');
       return null;
     }
 
@@ -169,18 +169,18 @@ exports.createNotification = async (recipientId, triggeredById, type, data = {})
     
     // Emit notification through WebSocket if available
     if (global.io) {
-      console.log('Emitting notification to user:', recipientId);
+      logger.info('Emitting notification to user:', { recipientId });
       global.io.to(recipientId.toString()).emit('notification', {
         event: 'notification',
         data: populatedNotification
       });
     } else {
-      console.log('WebSocket not available for notification');
+      logger.debug('WebSocket not available for notification');
     }
 
     return populatedNotification;
   } catch (error) {
-    console.error('Create notification error:', error);
+    logger.error('Create notification error:', { error });
     throw error;
   }
 }; 

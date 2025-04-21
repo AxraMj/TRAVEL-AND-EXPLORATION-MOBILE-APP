@@ -4,7 +4,6 @@ const Profile = require('../models/Profile');
 const { createNotification } = require('./notificationController');
 const mongoose = require('mongoose');
 const logger = require('../config/logger');
-const { AppError } = require('../middleware/errorHandler');
 const Notification = require('../models/Notification');
 
 exports.createPost = async (req, res) => {
@@ -50,7 +49,7 @@ exports.createPost = async (req, res) => {
 
     res.status(201).json(populatedPost);
   } catch (error) {
-    console.error('Post creation error:', error);
+    logger.error('Post creation error:', { error: error.message });
     res.status(500).json({ message: 'Failed to create post' });
   }
 };
@@ -83,7 +82,7 @@ exports.getFollowedPosts = async (req, res) => {
 
     res.json(enhancedPosts);
   } catch (error) {
-    console.error('Get followed posts error:', error);
+    logger.error('Get followed posts error:', { error: error.message });
     res.status(500).json({ message: 'Failed to fetch followed posts' });
   }
 };
@@ -116,7 +115,7 @@ exports.getAllPosts = async (req, res) => {
 
     res.json(enhancedPosts);
   } catch (error) {
-    console.error('Get posts error:', error);
+    logger.error('Get posts error:', { error: error.message });
     res.status(500).json({ message: 'Failed to fetch posts' });
   }
 };
@@ -141,7 +140,7 @@ exports.getUserPosts = async (req, res) => {
 
     res.json(enhancedPosts);
   } catch (error) {
-    console.error('Get user posts error:', error);
+    logger.error('Get user posts error:', { error: error.message });
     res.status(500).json({ message: 'Failed to fetch user posts' });
   }
 };
@@ -151,11 +150,11 @@ exports.likePost = async (req, res) => {
     const { postId } = req.params;
     const userId = req.user.userId;
 
-    console.log('Like post request:', { postId, userId });
+    logger.info('Like post request:', { postId, userId });
 
     // Validate postId
     if (!postId || !mongoose.Types.ObjectId.isValid(postId)) {
-      console.error('Invalid post ID:', postId);
+      logger.error('Invalid post ID:', { postId });
       return res.status(400).json({ message: 'Invalid post ID' });
     }
 
@@ -164,16 +163,16 @@ exports.likePost = async (req, res) => {
       .populate('userId', 'username profileImage fullName');
 
     if (!post) {
-      console.error('Post not found:', postId);
+      logger.error('Post not found:', { postId });
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    console.log('Found post:', post._id);
+    logger.debug('Found post:', { postId: post._id });
 
     const hasLiked = post.likes.includes(userId);
     if (hasLiked) {
       // Unlike
-      console.log('Removing like');
+      logger.debug('Removing like', { postId, userId });
       post.likes = post.likes.filter(id => id.toString() !== userId);
       
       // Update profile stats
@@ -183,7 +182,7 @@ exports.likePost = async (req, res) => {
       );
     } else {
       // Like
-      console.log('Adding like');
+      logger.debug('Adding like', { postId, userId });
       post.likes.push(userId);
       
       // Update profile stats
@@ -202,7 +201,7 @@ exports.likePost = async (req, res) => {
             { postId: post._id }
           );
         } catch (notifError) {
-          console.error('Notification creation error:', notifError);
+          logger.error('Notification creation error:', { error: notifError.message });
           // Don't fail the like operation if notification fails
         }
       }
@@ -219,10 +218,10 @@ exports.likePost = async (req, res) => {
     postObj.isLiked = updatedPost.likes.includes(userId);
     postObj.isSaved = updatedPost.savedBy.includes(userId);
 
-    console.log('Successfully processed like/unlike');
+    logger.debug('Successfully processed like/unlike');
     res.json(postObj);
   } catch (error) {
-    console.error('Like post error:', error);
+    logger.error('Like post error:', { error: error.message });
     res.status(500).json({ 
       message: 'Failed to like post',
       error: process.env.NODE_ENV === 'development' ? error.toString() : undefined
@@ -261,7 +260,7 @@ exports.savePost = async (req, res) => {
 
     res.json(postObj);
   } catch (error) {
-    console.error('Save post error:', error);
+    logger.error('Save post error:', { error: error.message });
     res.status(500).json({ message: 'Failed to save post' });
   }
 };
@@ -350,7 +349,7 @@ exports.addComment = async (req, res) => {
 
     res.status(200).json(postObj);
   } catch (error) {
-    console.error('Add comment error:', error);
+    logger.error('Add comment error:', { error: error.message });
     res.status(500).json({ 
       message: 'Failed to add comment',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -398,7 +397,7 @@ exports.deleteComment = async (req, res) => {
 
     res.json(postObj);
   } catch (error) {
-    console.error('Delete comment error:', error);
+    logger.error('Delete comment error:', { error: error.message });
     res.status(500).json({ message: 'Failed to delete comment' });
   }
 };
@@ -426,7 +425,7 @@ exports.deletePost = async (req, res) => {
 
     res.json({ message: 'Post deleted successfully', deletedPostId: postId });
   } catch (error) {
-    console.error('Delete post error:', error);
+    logger.error('Delete post error:', { error: error.message });
     res.status(500).json({ message: 'Failed to delete post' });
   }
 };
@@ -480,7 +479,7 @@ exports.updatePost = async (req, res) => {
 
     res.json(postObj);
   } catch (error) {
-    logger.error('Update post error:', error);
+    logger.error('Update post error:', { error: error.message });
     res.status(500).json({ message: 'Failed to update post' });
   }
 };
@@ -506,7 +505,7 @@ exports.getSavedPosts = async (req, res) => {
 
     res.json(enhancedPosts);
   } catch (error) {
-    console.error('Get saved posts error:', error);
+    logger.error('Get saved posts error:', { error: error.message });
     res.status(500).json({ message: 'Failed to fetch saved posts' });
   }
 }; 

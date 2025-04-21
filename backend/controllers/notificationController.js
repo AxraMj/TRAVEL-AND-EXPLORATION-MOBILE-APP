@@ -1,8 +1,6 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
-const Post = require('../models/Post');
 const logger = require('../config/logger');
-const { AppError } = require('../middleware/errorHandler');
 
 exports.getNotifications = async (req, res) => {
   try {

@@ -265,22 +265,20 @@ async function createExplorers() {
 
         console.log(`Created explorer: ${explorerData.username}`);
       } catch (error) {
-        console.error(`Error creating ${explorerData.username}:`, error.message);
+        console.error('Error creating explorer:', error);
       }
     }
 
     // Create follow relationships
-    if (createdProfiles.length > 0) {
-      await createFollowRelationships(createdProfiles);
-    }
-
-    console.log('Finished creating explorers');
+    await createFollowRelationships(createdProfiles);
+    
+    console.log('Successfully created all explorers and their relationships');
+    return true;
   } catch (error) {
-    console.error('Script error:', error);
-  } finally {
-    await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
+    console.error('Error in createExplorers:', error);
+    throw error;
   }
 }
 
-createExplorers();
+// Export the function
+module.exports = { createExplorers };

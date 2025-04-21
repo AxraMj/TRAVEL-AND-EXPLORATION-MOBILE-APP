@@ -17,6 +17,16 @@ services:
         sync: false
       - key: CORS_ORIGIN
         value: "*"
+      - key: LOG_LEVEL
+        value: "info"
+      - key: JWT_EXPIRATION
+        value: "7d"
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
     healthCheckPath: /api/health
     plan: free
     branch: main 

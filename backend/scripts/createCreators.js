@@ -258,22 +258,20 @@ async function createCreators() {
 
         console.log(`Created creator: ${creatorData.username}`);
       } catch (error) {
-        console.error(`Error creating ${creatorData.username}:`, error.message);
+        console.error('Error creating creator:', error);
       }
     }
 
-    // Create follow relationships between creators
-    if (createdProfiles.length > 0) {
-      await createFollowRelationships(createdProfiles);
-    }
-
-    console.log('Finished creating creators');
+    // Create follow relationships
+    await createFollowRelationships(createdProfiles);
+    
+    console.log('Successfully created all creators and their relationships');
+    return true;
   } catch (error) {
-    console.error('Script error:', error);
-  } finally {
-    await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
+    console.error('Error in createCreators:', error);
+    throw error;
   }
 }
 
-createCreators();
+// Export the function
+module.exports = { createCreators };

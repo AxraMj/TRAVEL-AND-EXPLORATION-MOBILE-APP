@@ -23,17 +23,17 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(morgan('combined', { stream: logger.stream }));
 
 // Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// API health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
-});
-
-// Health check endpoint for deployment
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'healthy' });
 });
 
 // Routes

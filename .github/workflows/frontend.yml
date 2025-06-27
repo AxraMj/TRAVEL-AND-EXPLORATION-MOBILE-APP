@@ -23,10 +23,20 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '16.x'
+        node-version: '18.x'
+        cache: 'npm'
+        cache-dependency-path: './frontend/ci-tests/package-lock.json'
 
     - name: Install dependencies
-      run: npm install
+      run: npm ci
+
+    - name: Create test environment
+      run: |
+        echo "REACT_APP_API_URL=http://localhost:5000" > .env.test
+        echo "NODE_ENV=test" >> .env.test
 
     - name: Run tests
-      run: npm test 
+      run: npm test
+      env:
+        CI: true
+        NODE_ENV: test 
